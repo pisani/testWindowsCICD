@@ -30,6 +30,7 @@ jobs:
           ${{ secrets.IRIS_USER }}
           ${{ secrets.IRIS_PASSWORD }}
           if $SYSTEM.Mirror.IsPrimary() do ##class(SourceControl.Git.API).Pull(1)
+          if ##class(%Library.EnsembleMgr).IsEnsembleNamespace($ZN),##class(Ens.Director).ProductionNeedsUpdate() do ##class(Ens.Director).UpdateProduction()
           halt
           "@
           
