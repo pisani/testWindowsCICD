@@ -34,12 +34,12 @@ jobs:
           $scriptContent | Out-File -FilePath "${{ github.workspace }}\deploy.scr" -Encoding ASCII
           Write-Host "Terminal script created successfully"
       
-      - name: Deploy to IRIS Test Server
+      - name: Deploy to IRIS DEV Server
         shell: cmd
         run: |
           set "iristermPath=D:\InterSystems\IRISDEV\bin\irisdb.exe"
           set "scriptPath=${{ github.workspace }}\deploy.scr"
-          set "irisMgrPath=C:\InterSystems\IRISDEV\mgr"
+          set "irisMgrPath=D:\InterSystems\IRISDEV\mgr"
           
           echo Executing IRIS deployment...
           echo IRIS Path: %iristermPath%
