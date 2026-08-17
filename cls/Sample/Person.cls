@@ -1,4 +1,4 @@
 Class Sample.Person as %RegisteredObject
 {
-  ///comment.. SampleChange - with file opened, by PS
+  ///comment.. SampleChange - with file opened
 }
