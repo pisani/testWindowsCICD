@@ -12,9 +12,9 @@ jobs:
       matrix:
         include:
           - servertag: server1
-            runner: [self-hosted, test, server1]
+            runner: [self-hosted, Windows, X64, iristest, server1]
           - servertag: server2
-            runner: [self-hosted, test, server2]
+            runner: [self-hosted, Windows, X64, iristest, server2]
     runs-on: ${{ matrix.runner }}
     environment: test
     
