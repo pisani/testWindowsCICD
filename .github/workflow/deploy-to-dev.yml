@@ -1,0 +1,66 @@
+name: Deploy to IRIS DEV Environment
+
+on:
+  push:
+    branches:
+      - development
+
+jobs:
+  deploy:
+    name: Deploy to InterSystems IRIS Dev server
+    strategy:
+      matrix:
+        include:
+          - servertag: server1
+            runner: [self-hosted, Windows, X64, irisdev]
+    runs-on: ${{ matrix.runner }}
+    environment: dev
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+
+      - name: Create Terminal Script
+        shell: powershell
+        run: |
+          $scriptContent = @"
+          ${{ secrets.IRIS_USER }}
+          ${{ secrets.IRIS_PASSWORD }}
+          do ##class(SourceControl.Git.API).Pull(1)
+          halt
+          "@
+          
+          $scriptContent | Out-File -FilePath "${{ github.workspace }}\deploy.scr" -Encoding ASCII
+          Write-Host "Terminal script created successfully"
+      
+      - name: Deploy to IRIS Test Server
+        shell: cmd
+        run: |
+          set "iristermPath=D:\InterSystems\IRISDEV\bin\irisdb.exe"
+          set "scriptPath=${{ github.workspace }}\deploy.scr"
+          set "irisMgrPath=C:\InterSystems\IRISDEV\mgr"
+          
+          echo Executing IRIS deployment...
+          echo IRIS Path: %iristermPath%
+          echo Script: %scriptPath%
+          
+          "%iristermPath%" -s "%irisMgrPath%" -U CTI < ${{ github.workspace }}\deploy.scr > "${{ github.workspace }}\deployment.log"
+          
+          if %ERRORLEVEL% neq 0 (
+            echo IRIS deployment failed with exit code %ERRORLEVEL% 1>&2
+            exit /b %ERRORLEVEL%
+          )      
+      
+      - name: Display Deployment Log
+        if: always()
+        shell: powershell
+        run: |
+          $logPath = "${{ github.workspace }}\deployment.log"
+          if (Test-Path $logPath) {
+            Write-Host "`n=== Deployment Log ===" -ForegroundColor Cyan
+            Get-Content $logPath
+          } else {
+            Write-Host "No deployment log found" -ForegroundColor Yellow
+          }      
+         
