@@ -16,7 +16,7 @@ jobs:
           - servertag: server2
             runner: [self-hosted, Windows, X64, au5570spisani-irislive, server2]
     runs-on: ${{ matrix.runner }}
-    environment: test
+    environment: LIVE
     
     steps:
       - name: Checkout code
