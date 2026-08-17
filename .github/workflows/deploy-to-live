@@ -1,0 +1,68 @@
+name: Deploy to IRIS LIVE Environment
+
+on:
+  push:
+    branches:
+      - live
+
+jobs:
+  deploy:
+    name: Deploy to InterSystems IRIS Live servers
+    strategy:
+      matrix:
+        include:
+          - servertag: server1
+            runner: [self-hosted, Windows, X64, au5570spisani-irislive, server1]
+          - servertag: server2
+            runner: [self-hosted, Windows, X64, au5570spisani-irislive, server2]
+    runs-on: ${{ matrix.runner }}
+    environment: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+
+      - name: Create Terminal Script
+        shell: powershell
+        run: |
+          $scriptContent = @"
+          ${{ secrets.IRIS_USER }}
+          ${{ secrets.IRIS_PASSWORD }}
+          if '$SYSTEM.Mirror.IsPrimary() do ##class(SourceControl.Git.API).Pull(1)
+          halt
+          "@
+          
+          $scriptContent | Out-File -FilePath "${{ github.workspace }}\deploy.scr" -Encoding ASCII
+          Write-Host "Terminal script created successfully"
+      
+      - name: Deploy to IRIS Live Server
+        shell: cmd
+        run: |
+          set "iristermPath=D:\InterSystems\IRISLIVE\bin\irisdb.exe"
+          set "scriptPath=${{ github.workspace }}\deploy.scr"
+          set "irisMgrPath=d:\InterSystems\IRISLIVE\mgr"
+          
+          echo Executing IRIS deployment...
+          echo IRIS Path: %iristermPath%
+          echo Script: %scriptPath%
+          
+          "%iristermPath%" -s "%irisMgrPath%" -U IRISAPP < ${{ github.workspace }}\deploy.scr > "${{ github.workspace }}\deployment.log"
+          
+          if %ERRORLEVEL% neq 0 (
+            echo IRIS deployment failed with exit code %ERRORLEVEL% 1>&2
+            exit /b %ERRORLEVEL%
+          )      
+      
+      - name: Display Deployment Log
+        if: always()
+        shell: powershell
+        run: |
+          $logPath = "${{ github.workspace }}\deployment.log"
+          if (Test-Path $logPath) {
+            Write-Host "`n=== Deployment Log ===" -ForegroundColor Cyan
+            Get-Content $logPath
+          } else {
+            Write-Host "No deployment log found" -ForegroundColor Yellow
+          }      
+         
