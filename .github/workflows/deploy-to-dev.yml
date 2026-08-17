@@ -45,7 +45,7 @@ jobs:
           echo IRIS Path: %iristermPath%
           echo Script: %scriptPath%
           
-          "%iristermPath%" -s "%irisMgrPath%" -U CTI < ${{ github.workspace }}\deploy.scr > "${{ github.workspace }}\deployment.log"
+          "%iristermPath%" -s "%irisMgrPath%" -U IRISAPP < ${{ github.workspace }}\deploy.scr > "${{ github.workspace }}\deployment.log"
           
           if %ERRORLEVEL% neq 0 (
             echo IRIS deployment failed with exit code %ERRORLEVEL% 1>&2
