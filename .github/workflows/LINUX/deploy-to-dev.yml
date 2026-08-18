@@ -1,0 +1,72 @@
+name: Deploy to IRIS DEV Environment
+
+on:
+  push:
+    branches:
+      - development
+
+jobs:
+  deploy:
+    name: Deploy to InterSystems IRIS DEV server (LINUX) 
+    strategy:
+      matrix:
+        include:
+          - servertag: development 
+            runner: [self-hosted, linux, x64, dev-isc]
+    runs-on: ${{ matrix.runner }}
+    environment: development
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        
+      - name: Create Terminal Script (LINUX)
+        shell: bash
+        env:
+          IRIS_USER: ${{ secrets.IRIS_USER }}
+          IRIS_PASSWORD: ${{ secrets.IRIS_PASSWORD }}
+
+        run: |
+          cat > "${GITHUB_WORKSPACE}/deploy.scr" <<EOF
+          ${IRIS_USER}
+          ${IRIS_PASSWORD}
+          do ##class(SourceControl.Git.API).Pull(1)
+          if ##class(%Library.EnsembleMgr).IsEnsembleNamespace($ZN),##class(Ens.Director).ProductionNeedsUpdate() do ##class(Ens.Director).UpdateProduction()
+          halt
+          EOF
+          echo "Terminal script created successfully"
+          
+      - name: Deploy to IRIS Dev Server (LINUX)
+        shell: bash
+        run: |
+          iristermPath="/usr/irissys/bin/iris"
+          scriptPath="${GITHUB_WORKSPACE}/deploy.scr"
+          irisInstance="IRISHEALTH"
+          
+          echo "Executing IRIS deployment..."
+          echo "IRIS Path: ${iristermPath}"
+          echo "Script: ${scriptPath}"
+          
+          "${iristermPath}" session ${irisInstance} -U IRISAPP \
+              < "${scriptPath}" \
+              > "${GITHUB_WORKSPACE}/deployment.log"
+          
+          rc=$?
+          
+          if [ $rc -ne 0 ]; then
+              echo "IRIS deployment failed with exit code $rc" >&2
+              exit $rc
+          fi     
+      
+      - name: Display Deployment Log (LINUX)
+        if: always()
+        shell: bash
+        run: |
+          logPath="${GITHUB_WORKSPACE}/deployment.log"
+          if [ -f "$logPath" ]; then
+              echo
+              echo "=== Deployment Log ==="
+              cat "$logPath"
+          else
+              echo "No deployment log found"
+          fi 
