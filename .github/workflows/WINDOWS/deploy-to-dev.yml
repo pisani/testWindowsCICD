@@ -27,7 +27,7 @@ jobs:
           $scriptContent = @"
           ${{ secrets.IRIS_USER }}
           ${{ secrets.IRIS_PASSWORD }}
-          do ##class(SourceControl.Git.API).Pull(1)
+          if ##class(%SYSTEM.Mirror).GetStatus()="NOTINIT"||(##class(%SYSTEM.Mirror).IsPrimary()) do ##class(SourceControl.Git.API).Pull(1)
           if ##class(%Library.EnsembleMgr).IsEnsembleNamespace($ZN),##class(Ens.Director).ProductionNeedsUpdate() do ##class(Ens.Director).UpdateProduction()
           halt
           "@
