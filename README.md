@@ -5,6 +5,6 @@ Dummy repo for testing CICD deployment on Windows.
 
 for example:
 
-  IRISDEV service                  Log On as       NT Authority\System    (Local System account)
-  GITHub runner Service            Log On as       NT Authority\System    (Local System account)
-  D:\InterSystems\IRISDEV\GITHUB   Ownership       NT Authority\System    (Local System account)  do this: icacls "D:\InterSystems\IRISDEV\GITHUB" /setowner "NT AUTHORITY\SYSTEM" /T /C
+* IRISDEV service                  Log On as       NT Authority\System    (Local System account)
+* GITHub runner Service            Log On as       NT Authority\System    (Local System account)
+* D:\InterSystems\IRISDEV\GITHUB   Ownership       NT Authority\System    (Local System account)  do this: icacls "D:\InterSystems\IRISDEV\GITHUB" /setowner "NT AUTHORITY\SYSTEM" /T /C
