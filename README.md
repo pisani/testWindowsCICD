@@ -1,5 +1,7 @@
 Dummy repo for testing CICD deployment on Windows.
 
+Developed in conjunction with instance IRISDEV installed in D:\InterSystems\IRISDEV, and embedded-git enabled namespace IRISAPP.
+
 - make sure IRIS Instance (found in github actions for dev, or live .yaml) runs as the same Windows Account as the GITHUB Runner service, AND
 - the local GIT workfolder's ownership is also, the same.
 
